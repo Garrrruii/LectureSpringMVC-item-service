@@ -51,7 +51,8 @@ public class BasicItemController {
 		// 4. (remark) 사실 어노테이션 자체도 생략 가능
 
 		itemRepository.save(item);
-		return "basic/item";
+		return "redirect:/basic/items/" + item.getId();
+		// Adopt PRG pattern
 	}
 
 	@GetMapping("/{itemId}/edit")
