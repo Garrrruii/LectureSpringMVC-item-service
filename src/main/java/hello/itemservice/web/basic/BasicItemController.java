@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
@@ -43,9 +44,13 @@ public class BasicItemController {
 
 	// 동일 url을 http method로 기능 구분
 	@PostMapping("/add")
-	public String save() {
-		// TODO save
-		return "xxx";
+	public String addItem(@RequestParam String itemName, @RequestParam Integer price, @RequestParam Integer quantity,
+		Model model) {
+		Item item = Item.builder().name(itemName).price(price).quantity(quantity).build();
+
+		itemRepository.save(item);
+		model.addAttribute("item", item);
+		return "basic/item";
 	}
 
 	@PostConstruct
