@@ -54,6 +54,22 @@ public class BasicItemController {
 		return "basic/item";
 	}
 
+	@GetMapping("/{itemId}/edit")
+	public String editForm(@PathVariable Long itemId, Model model) {
+		Item item = itemRepository.findById(itemId);
+		model.addAttribute("item", item);
+		return "basic/editForm";
+	}
+
+	@PostMapping("/{itemId}/edit")
+	public String editItem(@PathVariable Long itemId, @ModelAttribute("item") Item updatedItem, Model model) {
+		itemRepository.update(itemId, updatedItem);
+
+		return "redirect:/basic/items/{itemId}";
+		// 1. redirect
+		// 2. PathVariable로 사용한 변수는 이렇게도 사용 가능
+	}
+
 	@PostConstruct
 	public void init() {
 		itemRepository.save(Item.builder().name("itemA").price(10000).quantity(10).build());
