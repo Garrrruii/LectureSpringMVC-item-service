@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
@@ -44,15 +45,19 @@ public class BasicItemController {
 
 	// 동일 url을 http method로 기능 구분
 	@PostMapping("/add")
-	public String addItem(@ModelAttribute("item") Item item) {
+	public String addItem(@ModelAttribute("item") Item item, RedirectAttributes redirectAttributes) {
 		// 1. @ModelAttribute 사용 => Item 을 직접 생성하지 않아도 된다.
 		// 2. @ModelAttribute 이름 지정 => model.addAttribute() 생략 가능
 		// 3. @ModelAttribute 이름 생략 시, 클래스 명에 smallCamelCase 를 적용한 이름으로 model.addAttribute된다.
 		// 4. (remark) 사실 어노테이션 자체도 생략 가능
 
-		itemRepository.save(item);
-		return "redirect:/basic/items/" + item.getId();
+		Item savedItem = itemRepository.save(item);
+		redirectAttributes.addAttribute("itemId", savedItem.getId());
+		redirectAttributes.addAttribute("status", true);
+
+		return "redirect:/basic/items/{itemId}";
 		// Adopt PRG pattern
+		// Use redirectAttributes - url, query parameter
 	}
 
 	@GetMapping("/{itemId}/edit")
