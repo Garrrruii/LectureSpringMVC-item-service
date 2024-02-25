@@ -1,4 +1,4 @@
-package hello.itemservice.web.basic;
+package hello.itemservice.web.form;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ import hello.itemservice.domain.item.ItemRepository;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/basic/items")
+@RequestMapping("/form/items")
 @RequiredArgsConstructor
-public class BasicItemController {
+public class FormItemController {
 
 	private final ItemRepository itemRepository;
 
@@ -26,53 +26,41 @@ public class BasicItemController {
 	public String items(Model model) {
 		List<Item> items = itemRepository.findAll();
 		model.addAttribute("items", items);
-
-		return "basic/items";
+		return "form/items";
 	}
 
 	@GetMapping("/{itemId}")
-	public String item(@PathVariable Long itemId, Model model) {
+	public String item(@PathVariable long itemId, Model model) {
 		Item item = itemRepository.findById(itemId);
 		model.addAttribute("item", item);
-		return "basic/item";
+		return "form/item";
 	}
 
 	@GetMapping("/add")
 	public String addForm() {
-		return "basic/addForm";
+		return "form/addForm";
 	}
 
-	// 동일 url을 http method로 기능 구분
 	@PostMapping("/add")
-	public String addItem(@ModelAttribute("item") Item item, RedirectAttributes redirectAttributes) {
-		// 1. @ModelAttribute 사용 => Item 을 직접 생성하지 않아도 된다.
-		// 2. @ModelAttribute 이름 지정 => model.addAttribute() 생략 가능
-		// 3. @ModelAttribute 이름 생략 시, 클래스 명에 smallCamelCase 를 적용한 이름으로 model.addAttribute된다.
-		// 4. (remark) 사실 어노테이션 자체도 생략 가능
-
+	public String addItem(@ModelAttribute Item item, RedirectAttributes redirectAttributes) {
 		Item savedItem = itemRepository.save(item);
 		redirectAttributes.addAttribute("itemId", savedItem.getId());
 		redirectAttributes.addAttribute("status", true);
-
-		return "redirect:/basic/items/{itemId}";
-		// Adopt PRG pattern
-		// Use redirectAttributes - url, query parameter
+		return "redirect:/form/items/{itemId}";
 	}
 
 	@GetMapping("/{itemId}/edit")
 	public String editForm(@PathVariable Long itemId, Model model) {
 		Item item = itemRepository.findById(itemId);
 		model.addAttribute("item", item);
-		return "basic/editForm";
+		return "form/editForm";
 	}
 
 	@PostMapping("/{itemId}/edit")
-	public String editItem(@PathVariable Long itemId, @ModelAttribute("item") Item updatedItem) {
-		itemRepository.update(itemId, updatedItem);
-
-		return "redirect:/basic/items/{itemId}";
-		// 1. redirect
-		// 2. PathVariable로 사용한 변수는 이렇게도 사용 가능
+	public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
+		itemRepository.update(itemId, item);
+		return "redirect:/form/items/{itemId}";
 	}
 
 }
+
