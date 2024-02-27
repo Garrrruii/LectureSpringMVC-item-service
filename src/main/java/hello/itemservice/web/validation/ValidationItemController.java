@@ -80,13 +80,16 @@ public class ValidationItemController {
 	private static void validateItem(Item item, BindingResult bindingResult) {
 		// 필드 검증
 		if (!StringUtils.hasText(item.getName())) {
-			bindingResult.addError(new FieldError("item", "name", "상품명은 필수입니다."));
+			bindingResult.addError(new FieldError(
+				"item", "name", item.getName(), false, null, null, "상품명은 필수입니다."));
 		}
 		if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-			bindingResult.addError(new FieldError("item", "price", "가격은 1,000~1,000,000까지 허용합니다."));
+			bindingResult.addError(new FieldError(
+				"item", "price", item.getPrice(), false, null, null, "가격은 1,000~1,000,000까지 허용합니다."));
 		}
 		if (item.getQuantity() == null || item.getQuantity() < 0 || item.getQuantity() > 9999) {
-			bindingResult.addError(new FieldError("item", "quantity", "수량은 1~9,999까지 허용합니다."));
+			bindingResult.addError(new FieldError(
+				"item", "quantity", item.getQuantity(), false, null, null, "수량은 1~9,999까지 허용합니다."));
 		}
 
 		// 복합 룰 검증
