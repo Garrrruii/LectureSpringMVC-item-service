@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +28,11 @@ public class ValidationItemController {
 
 	private final ItemRepository itemRepository;
 	private final ItemValidator itemValidator;
+
+	@InitBinder
+	public void init(WebDataBinder dataBinder) {
+		dataBinder.addValidators(itemValidator);
+	}
 
 	@GetMapping
 	public String items(Model model) {
@@ -47,13 +55,12 @@ public class ValidationItemController {
 	}
 
 	@PostMapping("/add")
-	public String addItem(@ModelAttribute Item item, BindingResult bindingResult,
+	public String addItem(@Validated @ModelAttribute Item item, BindingResult bindingResult,
 		RedirectAttributes redirectAttributes) {
 		// item과 bindingResult의 순서가 중요 (item에 바인딩 실패 시 bindingResult에 FieldError를 담음)
 		// bindingResult는 본인이 검증할 대상이 무엇인지 알고 있음
 		log.info("objectName={} target={}", bindingResult.getObjectName(), bindingResult.getTarget());
 
-		itemValidator.validate(item, bindingResult);
 		if (bindingResult.hasErrors()) {
 			log.info("{}", bindingResult);
 			return "validation/addForm";
