@@ -28,8 +28,8 @@ public class ItemValidator implements Validator {
 			if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
 				errors.rejectValue("price", "range", new Object[] {1000, 1000000}, null);
 			}
-			if (item.getQuantity() == null || item.getQuantity() < 1 || item.getQuantity() > 9999) {
-				errors.rejectValue("quantity", "range", new Object[] {1, 9999}, null);
+			if (item.getQuantity() == null || item.getQuantity() > 9999) {
+				errors.rejectValue("quantity", "max", new Object[] {9999}, null);
 			}
 
 			// 복합 룰 검증
