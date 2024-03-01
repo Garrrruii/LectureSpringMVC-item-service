@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -25,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ValidationItemController {
 
 	private final ItemRepository itemRepository;
+	private final ItemValidator itemValidator;
 
 	@GetMapping
 	public String items(Model model) {
@@ -53,7 +53,7 @@ public class ValidationItemController {
 		// bindingResult는 본인이 검증할 대상이 무엇인지 알고 있음
 		log.info("objectName={} target={}", bindingResult.getObjectName(), bindingResult.getTarget());
 
-		validateItem(item, bindingResult);
+		itemValidator.validate(item, bindingResult);
 		if (bindingResult.hasErrors()) {
 			log.info("{}", bindingResult);
 			return "validation/addForm";
@@ -76,33 +76,6 @@ public class ValidationItemController {
 	public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
 		itemRepository.update(itemId, item);
 		return "redirect:/validation/items/{itemId}";
-	}
-
-	private static void validateItem(Item item, BindingResult bindingResult) {
-		try {
-			// 필드 검증
-			if (!StringUtils.hasText(item.getName())) {
-				bindingResult.rejectValue("name", "required");
-			}
-			// ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "name", "required");
-			// 위 if문이 이 코드와 동일 (단순 기능만 있음)
-			if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-				bindingResult.rejectValue("price", "range", new Object[] {1000, 1000000}, null);
-			}
-			if (item.getQuantity() == null || item.getQuantity() < 1 || item.getQuantity() > 9999) {
-				bindingResult.rejectValue("quantity", "range", new Object[] {1, 9999}, null);
-			}
-
-			// 복합 룰 검증
-			if (item.getPrice() != null && item.getQuantity() != null) {
-				long value = (long)item.getPrice() * item.getQuantity();
-				if (value < 10000L) {
-					bindingResult.reject("totalPriceMin", new Object[] {10000, value}, null);
-				}
-			}
-		} catch (Exception e) {
-			log.error("validateItem exception ", e);
-		}
 	}
 }
 
