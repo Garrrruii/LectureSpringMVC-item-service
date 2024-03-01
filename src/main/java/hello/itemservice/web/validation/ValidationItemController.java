@@ -79,26 +79,29 @@ public class ValidationItemController {
 	}
 
 	private static void validateItem(Item item, BindingResult bindingResult) {
-		// 필드 검증
-		if (!StringUtils.hasText(item.getName())) {
-			bindingResult.rejectValue("name", "required");
-		}
-		// ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "name", "required");
-		// 위 if문이 이 코드와 동일 (단순 기능만 있음)
-
-		if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-			bindingResult.rejectValue("price", "range", new Object[] {1000, 1000000}, null);
-		}
-		if (item.getQuantity() == null || item.getQuantity() < 1 || item.getQuantity() > 9999) {
-			bindingResult.rejectValue("quantity", "range", new Object[] {1, 9999}, null);
-		}
-
-		// 복합 룰 검증
-		if (item.getPrice() != null && item.getQuantity() != null) {
-			long value = (long)item.getPrice() * item.getQuantity();
-			if (value < 10000L) {
-				bindingResult.reject("totalPriceMin", new Object[] {10000, value}, null);
+		try {
+			// 필드 검증
+			if (!StringUtils.hasText(item.getName())) {
+				bindingResult.rejectValue("name", "required");
 			}
+			// ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "name", "required");
+			// 위 if문이 이 코드와 동일 (단순 기능만 있음)
+			if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
+				bindingResult.rejectValue("price", "range", new Object[] {1000, 1000000}, null);
+			}
+			if (item.getQuantity() == null || item.getQuantity() < 1 || item.getQuantity() > 9999) {
+				bindingResult.rejectValue("quantity", "range", new Object[] {1, 9999}, null);
+			}
+
+			// 복합 룰 검증
+			if (item.getPrice() != null && item.getQuantity() != null) {
+				long value = (long)item.getPrice() * item.getQuantity();
+				if (value < 10000L) {
+					bindingResult.reject("totalPriceMin", new Object[] {10000, value}, null);
+				}
+			}
+		} catch (Exception e) {
+			log.error("validateItem exception ", e);
 		}
 	}
 }
