@@ -15,14 +15,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
-import hello.itemservice.domain.item.SaveCheck;
-import hello.itemservice.domain.item.UpdateCheck;
+import hello.itemservice.web.validation.form.ItemSaveForm;
+import hello.itemservice.web.validation.form.ItemUpdateForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
-@RequestMapping("/validation/items") // v3
+@RequestMapping("/validation/items") // v4
 @RequiredArgsConstructor
 public class ValidationItemController {
 
@@ -49,8 +49,12 @@ public class ValidationItemController {
 	}
 
 	@PostMapping("/add")
-	public String addItem(@Validated(SaveCheck.class) @ModelAttribute Item item, BindingResult bindingResult,
+	public String addItem(@Validated @ModelAttribute("item") ItemSaveForm form, BindingResult bindingResult,
 		RedirectAttributes redirectAttributes) {
+		Item item = Item.builder()
+			.name(form.getName()).price(form.getPrice()).quantity(form.getQuantity())
+			.build();
+
 		validateItemObjectError(item, bindingResult);
 		if (bindingResult.hasErrors()) {
 			log.info("{}", bindingResult);
@@ -71,8 +75,12 @@ public class ValidationItemController {
 	}
 
 	@PostMapping("/{itemId}/edit")
-	public String edit(@PathVariable Long itemId, @Validated(UpdateCheck.class) @ModelAttribute Item item,
-		BindingResult bindingResult) {
+	public String edit(@PathVariable Long itemId,
+		@Validated @ModelAttribute("item") ItemUpdateForm form, BindingResult bindingResult) {
+		Item item = Item.builder()
+			.id(itemId).name(form.getName()).price(form.getPrice()).quantity(form.getQuantity())
+			.build();
+
 		validateItemObjectError(item, bindingResult);
 		if (bindingResult.hasErrors()) {
 			log.info("{}", bindingResult);
