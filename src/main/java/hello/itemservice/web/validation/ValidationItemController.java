@@ -49,10 +49,6 @@ public class ValidationItemController {
 	@PostMapping("/add")
 	public String addItem(@Validated @ModelAttribute Item item, BindingResult bindingResult,
 		RedirectAttributes redirectAttributes) {
-		// item과 bindingResult의 순서가 중요 (item에 바인딩 실패 시 bindingResult에 FieldError를 담음)
-		// bindingResult는 본인이 검증할 대상이 무엇인지 알고 있음
-		log.info("objectName={} target={}", bindingResult.getObjectName(), bindingResult.getTarget());
-
 		validateItemObjectError(item, bindingResult);
 		if (bindingResult.hasErrors()) {
 			log.info("{}", bindingResult);
@@ -73,7 +69,13 @@ public class ValidationItemController {
 	}
 
 	@PostMapping("/{itemId}/edit")
-	public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
+	public String edit(@PathVariable Long itemId, @Validated @ModelAttribute Item item, BindingResult bindingResult) {
+		validateItemObjectError(item, bindingResult);
+		if (bindingResult.hasErrors()) {
+			log.info("{}", bindingResult);
+			return "validation/editForm";
+		}
+
 		itemRepository.update(itemId, item);
 		return "redirect:/validation/items/{itemId}";
 	}
