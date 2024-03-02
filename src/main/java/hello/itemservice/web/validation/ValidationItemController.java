@@ -6,9 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,17 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
-@RequestMapping("/validation/items") // v2
+@RequestMapping("/validation/items") // v3
 @RequiredArgsConstructor
 public class ValidationItemController {
 
 	private final ItemRepository itemRepository;
-	private final ItemValidator itemValidator;
-
-	@InitBinder
-	public void init(WebDataBinder dataBinder) {
-		dataBinder.addValidators(itemValidator);
-	}
 
 	@GetMapping
 	public String items(Model model) {
@@ -61,6 +53,7 @@ public class ValidationItemController {
 		// bindingResult는 본인이 검증할 대상이 무엇인지 알고 있음
 		log.info("objectName={} target={}", bindingResult.getObjectName(), bindingResult.getTarget());
 
+		validateItemObjectError(item, bindingResult);
 		if (bindingResult.hasErrors()) {
 			log.info("{}", bindingResult);
 			return "validation/addForm";
@@ -83,6 +76,15 @@ public class ValidationItemController {
 	public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
 		itemRepository.update(itemId, item);
 		return "redirect:/validation/items/{itemId}";
+	}
+
+	private void validateItemObjectError(Item item, BindingResult bindingResult) {
+		if (item.getPrice() != null && item.getQuantity() != null) {
+			long value = (long)item.getPrice() * item.getQuantity();
+			if (value < 10000L) {
+				bindingResult.reject("totalPriceMin", new Object[] {10000, value}, null);
+			}
+		}
 	}
 }
 
